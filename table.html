@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tabel Kompak</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        background-color: white;
+        padding: 20px;
+      }
+      table {
+        border-collapse: collapse;
+        width: auto;
+        margin-bottom: 40px;
+      }
+      th,
+      td {
+        border: 3px solid black;
+        padding: 6px 12px;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+      th {
+        font-weight: bold;
+      }
+      table:nth-of-type(1) th:nth-child(1),
+      table:nth-of-type(1) td:nth-child(1) {
+        width: 120px;
+      }
+      table:nth-of-type(1) th:nth-child(2),
+      table:nth-of-type(1) td:nth-child(2) {
+        width: 120px;
+      }
+      table:nth-of-type(1) th:nth-child(3),
+      table:nth-of-type(1) td:nth-child(3) {
+        width: 50px;
+      }
+      table:nth-of-type(2) th:nth-child(1),
+      table:nth-of-type(2) td:nth-child(1) {
+        width: 120px;
+      }
+      table:nth-of-type(2) th:nth-child(2),
+      table:nth-of-type(2) td:nth-child(2) {
+        width: 90px;
+      }
+      table:nth-of-type(2) th:nth-child(3),
+      table:nth-of-type(2) td:nth-child(3) {
+        width: 90px;
+      }
+      table:nth-of-type(2) th:nth-child(4),
+      table:nth-of-type(2) td:nth-child(4) {
+        width: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Tabel Data Sederhana</h2>
+    <table>
+      <tr>
+        <th>Nama Lengkap</th>
+        <th>Kota Kelahiran</th>
+        <th>Age</th>
+      </tr>
+      <tr>
+        <td>Arvan</td>
+        <td>Tegal</td>
+        <td>21</td>
+      </tr>
+      <tr>
+        <td>Aji</td>
+        <td>Purwokerto</td>
+        <td>30</td>
+      </tr>
+      <tr>
+        <td>Arnanda</td>
+        <td>Cilacap</td>
+        <td>26</td>
+      </tr>
+    </table>
+    <h2>Tabel Gelar Pendidikan</h2>
+    <table>
+      <tr>
+        <th rowspan="2">Nama Lengkap</th>
+        <th colspan="2">Gelar Pendidikan</th>
+        <th rowspan="2">Age</th>
+      </tr>
+      <tr>
+        <th>Sarjana</th>
+        <th>Magister</th>
+      </tr>
+      <tr>
+        <td>Arvan</td>
+        <td>S.Kom</td>
+        <td>M.Sc</td>
+        <td>22</td>
+      </tr>
+      <tr>
+        <td>Murbiyanto</td>
+        <td>S.SiKom</td>
+        <td>M.T</td>
+        <td>22</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulir Pendaftaran Praktikan</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+      }
+      h2 {
+        color: #333;
+      }
+      table {
+        margin-top: 20px;
+        border-collapse: collapse;
+      }
+      td {
+        padding: 8px 10px;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        width: 200px;
+        padding: 5px;
+      }
+      input[type="submit"],
+      input[type="reset"] {
+        padding: 6px 15px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+      <h2>Formulir Pendaftaran Praktikum</h2>
+      <form action="#" method="POST">
+        <table>
+          <tr>
+            <td>
+              <label for="nama_id"><b>Nama:</b></label>
+            </td>
+            <td>:</td>
+            <td>
+              <input
+                type="text"
+                name="nama_input"
+                id="nama_id"
+                placeholder="Input Nama"
+                value="Praktikan"
+                readonly
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="uname_id"><b>Username:</b></label>
+            </td>
+            <td>:</td>
+            <td>
+              <input
+                type="text"
+                name="uname_input"
+                id="uname_id"
+                placeholder="Input Username"
+                value="Praktikum"
+                disabled
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="password_id"><b>Password:</b></label>
+            </td>
+            <td>:</td>
+            <td>
+              <input
+                type="password"
+                name="password_input"
+                id="password_id"
+                placeholder="Input Password"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="email_id"><b>Email:</b></label>
+            </td>
+            <td>:</td>
+            <td>
+              <input
+                type="email"
+                name="email_input"
+                id="email_id"
+                placeholder="Input Email"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td><b>Jenis Kelamin:</b></td>
+            <td>:</td>
+            <td>
+              <input type="radio" name="jk_input" id="pria" value="Pria" />
+              <label for="pria">Pria</label>
+              <input type="radio" name="jk_input" id="wanita" value="Wanita" />
+              <label for="wanita">Wanita</label>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Hobi:</b></td>
+            <td>:</td>
+            <td>
+              <input
+                type="checkbox"
+                name="hobi_input"
+                id="renang"
+                value="Renang"
+              />
+              <label for="renang">Renang</label>
+              <input
+                type="checkbox"
+                name="hobi_input"
+                id="membaca"
+                value="Membaca"
+              />
+              <label for="membaca">Membaca</label>
+              <input
+                type="checkbox"
+                name="hobi_input"
+                id="menulis"
+                value="Menulis"
+              />
+              <label for="menulis">Menulis</label>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center">
+              <input type="submit" value="Daftar" />
+              <input type="reset" value="Reset" />
+            </td>
+          </tr>
+        </table>
+      </form>
+    </center>
+  </body>
+</html>
