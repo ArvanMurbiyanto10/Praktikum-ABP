@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Profil - Arvan</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-image: url("tegal.jpeg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        font-family: "Segoe UI", sans-serif;
+        min-height: 100vh;
+      }
+
+      .profile-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 70px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .profile-img {
+        border: 4px solid #00bcd4;
+      }
+
+      .detail-img {
+        width: 180px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn-custom {
+        background: #00bcd4;
+        border: none;
+        color: white;
+        font-weight: bold;
+        border-radius: 30px;
+        padding: 10px 25px;
+        transition: 0.3s;
+      }
+
+      .btn-custom:hover {
+        background: #0097a7;
+        transform: scale(1.05);
+      }
+
+      .table {
+        background: white;
+      }
+
+      th {
+        color: #0097a7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div id="layoutRow" class="row justify-content-center">
+        <!-- PROFIL UTAMA -->
+        <div id="profileCol" class="col-md-6 profile-card text-center">
+          <h2 class="fw-bold mb-4">PROFIL MAHASISWA</h2>
+
+          <img
+            src="https://ui-avatars.com/api/?name=Arvan+Murbiyanto&background=0D8ABC&color=fff&size=130"
+            class="rounded-circle profile-img shadow mb-3"
+          />
+
+          <h3 class="fw-bold">Arvan Murbiyanto</h3>
+
+          <p class="text-muted mb-4">
+            Mahasiswa Informatika yang tertarik pada pengembangan website dan
+            teknologi digital.
+          </p>
+
+          <button id="btnToggleProfile" class="btn btn-custom">
+            Lihat Profil Lengkap
+          </button>
+        </div>
+
+        <!-- DETAIL PROFIL -->
+        <div
+          id="detailSection"
+          class="col-md-6 profile-card d-none text-center"
+        >
+          <h4 class="fw-bold mb-3 border-bottom border-info pb-2">
+            Informasi Detail
+          </h4>
+
+          <!-- FOTO KAMU -->
+          <img src="foto-arvan-2.jpg" class="detail-img" alt="Foto Arvan" />
+
+          <table class="table table-hover">
+            <tr>
+              <th width="40%">Nama</th>
+              <td>Arvan Murbiyanto</td>
+            </tr>
+
+            <tr>
+              <th>NIM</th>
+              <td>2311102074</td>
+            </tr>
+
+            <tr>
+              <th>Asal</th>
+              <td>Tegal, Jawa Tengah</td>
+            </tr>
+
+            <tr>
+              <th>Minat</th>
+              <td>Fullstacks Development</td>
+            </tr>
+
+            <tr>
+              <th>Hobi</th>
+              <td>Main bola, Futsal</td>
+            </tr>
+
+            <tr>
+              <th>Cita-cita</th>
+              <td>Pengusaha aja</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const btnToggle = document.getElementById("btnToggleProfile");
+      const detailSection = document.getElementById("detailSection");
+      const profileCol = document.getElementById("profileCol");
+
+      btnToggle.addEventListener("click", function () {
+        const isHidden = detailSection.classList.contains("d-none");
+
+        if (isHidden) {
+          detailSection.classList.remove("d-none");
+          profileCol.classList.remove("col-md-6");
+          profileCol.classList.add("col-md-5");
+          btnToggle.textContent = "Tutup Profil";
+        } else {
+          detailSection.classList.add("d-none");
+          profileCol.classList.remove("col-md-5");
+          profileCol.classList.add("col-md-6");
+          btnToggle.textContent = "Lihat Profil Lengkap";
+        }
+      });
+    </script>
+  </body>
+</html>
