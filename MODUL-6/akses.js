@@ -1,7 +1,7 @@
 var mobil = {
-    "warna-badan": "merah",
-    "nomor-polisi": "BK1234AB",
-    "jumlah_roda": 4
+  "warna-badan": "merah",
+  "nomor-polisi": "BK1234AB",
+  jumlah_roda: 4,
 };
 
 // 1. Menggunakan Kurung Siku [] (Wajib untuk nama properti ilegal/pakai spasi)

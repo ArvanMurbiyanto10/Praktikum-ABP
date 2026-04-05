@@ -1,6 +1,6 @@
 // Deklarasi variabel menggunakan kata kunci var
-var nama = "Yesika Widiyani"; // Tipe data String 
-var nim = "2311102195";       // Tipe data String 
+var nama = "Arvan Murbiyanto"; // Tipe data String
+var nim = "2311102074"; // Tipe data String
 
 // Menampilkan isi variabel ke terminal
 console.log("Halo, nama saya " + nama);

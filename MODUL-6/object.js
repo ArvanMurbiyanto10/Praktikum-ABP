@@ -3,18 +3,18 @@ var objek_kosong = {};
 
 // 2. Membuat Object dengan Properti (Object Literal)
 var mobil = {
-    "warna-badan": "merah",
-    "nomor-polisi": "BK1234AB",
-    "jumlah_roda": 4
+  "warna-badan": "biru",
+  "nomor-polisi": "BK1354AB",
+  jumlah_roda: 4,
 };
 
 // 3. Membuat Object Bersarang (Nested Object)
 var jadwal = {
-    platform: 34,
-    tujuan: {
-        kode_kota: "JKT",
-        nama_kota: "Jakarta"
-    }
+  platform: 34,
+  tujuan: {
+    kode_kota: "JKT",
+    nama_kota: "Jakarta",
+  },
 };
 
 // Menampilkan data object ke terminal
