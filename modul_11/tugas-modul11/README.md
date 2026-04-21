@@ -116,25 +116,26 @@ File ini berfungsi sebagai penyimpan data statis. Penyimpanan di dalam direktori
 
 ```json
 [
-  {
-    "nama": "Arnanda Setya nosa putra",
-    "nim": "2311102180",
-    "kelas": "IF-11-04",
-    "prodi": "Informatika"
-  },
-  {
-    "nama": "Zidane maulana",
-    "nim": "2311102002",
-    "kelas": "SE-11-01",
-    "prodi": "Rekayasa Perangkat Lunak"
-  },
-  {
-    "nama": "Andika toro",
-    "nim": "2311102003",
-    "kelas": "DS-11-02",
-    "prodi": "Sains Data"
-  }
+    {
+        "nama": "Arvan Murbiyanto",
+        "nim": "2311102074",
+        "kelas": "IF-11-04",
+        "prodi": "Informatika"
+    },
+    {
+        "nama": "Lamine Yamal",
+        "nim": "2311101010",
+        "kelas": "PO-11-10",
+        "prodi": "Pendidikan Olahraga"
+    },
+    {
+        "nama": "Benzema",
+        "nim": "2311109999",
+        "kelas": "AI-11-09",
+        "prodi": "Agama Islam"
+    }
 ]
+
 ```
 
 ### 3.2 Controller (`app/Http/Controllers/MahasiswaController.php`)
@@ -177,6 +178,7 @@ class MahasiswaController extends Controller
         ]);
     }
 }
+
 ```
 
 ### 3.3 Routing (`routes/web.php`)
@@ -188,11 +190,12 @@ Pendaftaran rute dilakukan pada file `web.php` untuk memisahkan akses tampilan u
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MahasiswaController;
 
-// Rute Halaman Utama (Blade Render)
+// Route untuk menampilkan halaman web
 Route::get('/', [MahasiswaController::class, 'index']);
 
-// Rute Endpoint API Mahasiswa (AJAX Access)
+// Route API internal untuk mengambil data dengan AJAX
 Route::get('/api/mahasiswa', [MahasiswaController::class, 'getMahasiswa']);
+
 ```
 
 ### 3.4 View Blade & AJAX (`resources/views/mahasiswa.blade.php`)
@@ -201,96 +204,169 @@ Antarmuka dibangun menggunakan Laravel Blade dengan JavaScript Fetch API. Implem
 ```html
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Akademik</title>
+    <title>Sistem Informasi Akademik Terpadu</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: #f3f4f6; margin: 0; padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 40px 20px;
+            color: #1f2937;
         }
-        .container { max-width: 800px; margin: 0 auto; }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         .btn-fetch {
-            display: block; width: 100%; max-width: 250px;
-            margin: 0 auto 30px; padding: 12px 20px;
-            background-color: #2563eb; color: white;
-            border: none; border-radius: 8px; font-weight: 600;
-            cursor: pointer; transition: 0.2s;
+            display: block;
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto 30px;
+            padding: 12px 20px;
+            background-color: #222f4b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        .btn-fetch:disabled { background-color: #94a3b8; }
+
+        .btn-fetch:hover {
+            background-color: #1d4ed8;
+        }
+
         .grid-cards {
-            display: grid; gap: 20px;
+            display: grid;
+            gap: 20px;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
+
         .card {
-            background: white; padding: 20px; border-radius: 12px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border-top: 4px solid #2563eb;
         }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            color: #111827;
+        }
+
+        .card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
     </style>
 </head>
+
 <body>
+
     <div class="container">
-        <h1 style="text-align: center; margin-bottom: 30px;">
-            Data Mahasiswa Aktif
-        </h1>
-        <button id="btnTampilkan" class="btn-fetch">
-            Tampilkan Data
-        </button>
+        <h1 class="header-title">Data Mahasiswa Aktif</h1>
+
+        <button id="btnTampilkan" class="btn-fetch">Tampilkan Data</button>
+
         <div id="resultArea" class="grid-cards"></div>
     </div>
 
     <script>
-        document.getElementById('btnTampilkan').addEventListener('click', 
-        async function() {
+        document.getElementById('btnTampilkan').addEventListener('click', async function () {
             const resultArea = document.getElementById('resultArea');
-            this.textContent = 'Memuat Data...';
-            this.disabled = true;
-            resultArea.innerHTML = ''; 
+            const btn = this;
+
+            // Ubah state tombol saat proses fetch
+            btn.textContent = 'Mengambil Data...';
+            btn.disabled = true;
+            resultArea.innerHTML = '';
 
             try {
-                // Fetch data menggunakan helper URL Laravel
+                // Request AJAX ke endpoint Laravel
                 const response = await fetch('{{ url("/api/mahasiswa") }}', {
-                    headers: { 'Accept': 'application/json' }
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
+
+                if (!response.ok) {
+                    throw new Error('Terjadi kesalahan jaringan atau server.');
+                }
 
                 const jsonResponse = await response.json();
 
                 if (jsonResponse.status === 'success') {
+                    // Loop data menggunakan pendekatan DOM Manipulation yang aman
                     jsonResponse.data.forEach(mhs => {
                         const card = document.createElement('div');
                         card.className = 'card';
-                        
-                        // Render data ke UI dengan sanitasi textContent
-                        card.innerHTML = `
-                            <h3 style="margin:0;">${mhs.nama}</h3>
-                            <p style="color:#64748b;">NIM: ${mhs.nim}</p>
-                            <p style="margin:5px 0;">Prodi: ${mhs.prodi}</p>
-                            <div style="margin-top:10px;">
-                                <span style="background:#dbeafe; color:#1e40af; 
-                                padding:4px 10px; border-radius:20px; 
-                                font-size:12px; font-weight:600;">
-                                    Kelas ${mhs.kelas}
-                                </span>
-                            </div>
-                        `;
+
+                        // Mencegah XSS dengan menggunakan textContent
+                        const nama = document.createElement('h3');
+                        nama.textContent = mhs.nama;
+
+                        const nim = document.createElement('p');
+                        nim.textContent = `NIM: ${mhs.nim}`;
+
+                        const prodi = document.createElement('p');
+                        prodi.textContent = `Program Studi: ${mhs.prodi}`;
+
+                        const wrapperKelas = document.createElement('div');
+                        wrapperKelas.style.marginTop = '10px';
+
+                        const kelas = document.createElement('span');
+                        kelas.className = 'badge';
+                        kelas.textContent = `Kelas ${mhs.kelas}`;
+
+                        wrapperKelas.appendChild(kelas);
+
+                        // Rangkai elemen ke dalam card
+                        card.append(nama, nim, prodi, wrapperKelas);
                         resultArea.appendChild(card);
                     });
                 }
             } catch (error) {
+                // Tampilkan error yang aman bagi pengguna
                 resultArea.innerHTML = `
-                    <p style="color:red; text-align:center;">
-                        Gagal mengambil data dari server.
-                    </p>`;
+                    <div style="color: red; text-align: center; width: 100%;">
+                        Gagal memuat data. Pastikan server berjalan dengan baik.
+                    </div>
+                `;
             } finally {
-                this.textContent = 'Tampilkan Data';
-                this.disabled = false;
+                // Kembalikan state tombol
+                btn.textContent = 'Tampilkan Data';
+                btn.disabled = false;
             }
         });
     </script>
 </body>
+
 </html>
 ```
 
