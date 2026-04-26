@@ -44,47 +44,55 @@
 <hr>
 
 # Dasar Praktikum
-Pada praktikum modul 13 ini, fokus pengembangan bergeser menuju eskalasi keamanan akses dan perancangan arsitektur *database* yang lebih kompleks. Mahasiswa ditugaskan untuk mengimplementasikan sistem *Authentication* (Login/Logout), manajemen sesi (*Session*), pembatasan akses (*Middleware*), serta menghubungkan antar-entitas data menggunakan skema relasi *One-to-Many* melalui Eloquent ORM di *framework* Laravel.
+
+Pada praktikum modul 13 ini, fokus pengembangan bergeser menuju eskalasi keamanan akses dan perancangan arsitektur _database_ yang lebih kompleks. Mahasiswa ditugaskan untuk mengimplementasikan sistem _Authentication_ (Login/Logout), manajemen sesi (_Session_), pembatasan akses (_Middleware_), serta menghubungkan antar-entitas data menggunakan skema relasi _One-to-Many_ melalui Eloquent ORM di _framework_ Laravel.
 
 # Dasar Teori
 
 ## 1.1 Manajemen Session
-*Session* adalah mekanisme penyimpanan data sementara di sisi server yang terikat pada interaksi pengguna tertentu. Laravel mendukung dua tipe sesi:
-* **Session Reguler:** Bertahan selama sesi peramban aktif atau hingga waktu kedaluwarsa habis (misal: menyimpan status login, nama *user*).
-* **Session Flash:** Hanya bertahan untuk satu siklus *HTTP Request* berikutnya sebelum otomatis terhapus (misal: notifikasi *success/error* saat *redirect*).
+
+_Session_ adalah mekanisme penyimpanan data sementara di sisi server yang terikat pada interaksi pengguna tertentu. Laravel mendukung dua tipe sesi:
+
+- **Session Reguler:** Bertahan selama sesi peramban aktif atau hingga waktu kedaluwarsa habis (misal: menyimpan status login, nama _user_).
+- **Session Flash:** Hanya bertahan untuk satu siklus _HTTP Request_ berikutnya sebelum otomatis terhapus (misal: notifikasi _success/error_ saat _redirect_).
 
 ## 1.2 Keamanan Berlapis via Middleware & Auth
-*Middleware* berfungsi sebagai pos pemeriksaan (*checkpoint*) yang menyaring setiap *HTTP Request* yang masuk. Jika suatu *route* diproteksi *Middleware Auth*, pengguna yang belum melalui proses otentikasi akan otomatis ditolak dan diarahkan ke halaman *Login*. Proses validasi kredensial sendiri difasilitasi oleh `Auth` *facade*, sebuah pustaka terintegrasi Laravel yang memvalidasi *email* dan *password* yang telah terenkripsi (di-*hash* menggunakan algoritma *Bcrypt*).
+
+_Middleware_ berfungsi sebagai pos pemeriksaan (_checkpoint_) yang menyaring setiap _HTTP Request_ yang masuk. Jika suatu _route_ diproteksi _Middleware Auth_, pengguna yang belum melalui proses otentikasi akan otomatis ditolak dan diarahkan ke halaman _Login_. Proses validasi kredensial sendiri difasilitasi oleh `Auth` _facade_, sebuah pustaka terintegrasi Laravel yang memvalidasi _email_ dan _password_ yang telah terenkripsi (di-_hash_ menggunakan algoritma _Bcrypt_).
 
 ## 1.3 Model Relasi (Eloquent Relationships)
-Aplikasi tingkat lanjut tidak mungkin berdiri hanya dengan tabel-tabel terisolasi. Laravel Eloquent menyederhanakan *Join* antar tabel menggunakan *Object-Oriented syntax*. Konsep *One-to-Many* (Satu-ke-Banyak) diterapkan di sini; di mana satu objek `Product` dapat memiliki banyak objek `Variant` (dikendalikan dengan `hasMany`), sedangkan setiap `Variant` dipastikan hanya merujuk pada satu `Product` secara spesifik (dikendalikan dengan `belongsTo`). 
+
+Aplikasi tingkat lanjut tidak mungkin berdiri hanya dengan tabel-tabel terisolasi. Laravel Eloquent menyederhanakan _Join_ antar tabel menggunakan _Object-Oriented syntax_. Konsep _One-to-Many_ (Satu-ke-Banyak) diterapkan di sini; di mana satu objek `Product` dapat memiliki banyak objek `Variant` (dikendalikan dengan `hasMany`), sedangkan setiap `Variant` dipastikan hanya merujuk pada satu `Product` secara spesifik (dikendalikan dengan `belongsTo`).
 
 ---
 
 # PENGERJAAN & IMPLEMENTASI SISTEM
 
-Penerapan pada modul ini menitikberatkan pada perancangan logika keamanan di sisi server dan interkoneksi entitas data agar tetap solid meski diakses oleh berbagai profil *user*.
+Penerapan pada modul ini menitikberatkan pada perancangan logika keamanan di sisi server dan interkoneksi entitas data agar tetap solid meski diakses oleh berbagai profil _user_.
 
 ## 2.1 Skema Autentikasi
-Akses ke menu pengelolaan produk kini dikunci sepenuhnya. 
 
-| Komponen | Implementasi Logika |
-| --- | --- |
-| **Routing** | URL `/product` disematkan `->middleware('auth')`. Pemanggilan *route* login diberi nama alias `name('login')` sebagai rujukan standar *Middleware*. |
-| **Pengecekan (Auth::check)** | Jika *user* sudah masuk, URL `/login` akan langsung memantulkannya ke *dashboard* produk untuk mencegah *bypass* logika. |
-| **Otentikasi (Auth::attempt)** | Membandingkan secara aman *input* *form* dengan *hash Bcrypt* yang tersimpan di basis data tanpa perlu mendeskripsi *password* secara paksa. |
+Akses ke menu pengelolaan produk kini dikunci sepenuhnya.
+
+| Komponen                       | Implementasi Logika                                                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Routing**                    | URL `/product` disematkan `->middleware('auth')`. Pemanggilan _route_ login diberi nama alias `name('login')` sebagai rujukan standar _Middleware_. |
+| **Pengecekan (Auth::check)**   | Jika _user_ sudah masuk, URL `/login` akan langsung memantulkannya ke _dashboard_ produk untuk mencegah _bypass_ logika.                            |
+| **Otentikasi (Auth::attempt)** | Membandingkan secara aman _input_ _form_ dengan _hash Bcrypt_ yang tersimpan di basis data tanpa perlu mendeskripsi _password_ secara paksa.        |
 
 ## 2.2 Relasi Entitas Database (One-to-Many)
-Tabel pendukung `variants` dibuat dengan menjaga integritas data menggunakan `foreignId` yang dirangkai dengan `constrained()`. Parameter ini memastikan pada level RDBMS bahwa *ID* produk yang disematkan ke dalam varian benar-benar ada di tabel referensi. Pemanggilan data varian ke antarmuka juga dieksekusi secara efisien menggunakan pendekatan hierarki objek di Blade.
+
+Tabel pendukung `variants` dibuat dengan menjaga integritas data menggunakan `foreignId` yang dirangkai dengan `constrained()`. Parameter ini memastikan pada level RDBMS bahwa _ID_ produk yang disematkan ke dalam varian benar-benar ada di tabel referensi. Pemanggilan data varian ke antarmuka juga dieksekusi secara efisien menggunakan pendekatan hierarki objek di Blade.
 
 ---
 
 ## 3. Source Code Praktikum
 
-> **Catatan Engineer:** Desain sistem relasional dan autentikasi wajib mematuhi standar *Clean Architecture*. Kode di bawah memastikan proteksi ketat pada *route*, penggunaan koneksi *database* secara bijak, dan limitasi penulisan sintaks agar ramah pada monitor portabel (14 inci).
+> **Catatan Engineer:** Desain sistem relasional dan autentikasi wajib mematuhi standar _Clean Architecture_. Kode di bawah memastikan proteksi ketat pada _route_, penggunaan koneksi _database_ secara bijak, dan limitasi penulisan sintaks agar ramah pada monitor portabel (14 inci).
 
 ### 3.1 Perlindungan Rute (Routing - `routes/web.php`)
-Pengaturan alur lalu lintas *request*, mendaftarkan fungsi otentikasi, serta memberikan tameng *middleware* pada rute esensial.
+
+Pengaturan alur lalu lintas _request_, mendaftarkan fungsi otentikasi, serta memberikan tameng _middleware_ pada rute esensial.
 
 ```php
 <?php
@@ -108,18 +116,20 @@ Route::post('/login', [SiteController::class, 'auth'])->name('login.post');
 // Rute Pemusnahan Sesi (Logout)
 Route::get('/logout', function () {
     Auth::logout();
-    
+
     // Invalidate sesi secara total guna memitigasi Session Fixation Attack
     session()->invalidate();
     session()->regenerateToken();
-    
+
     return redirect('/login');
 })->name('logout');
 
 // Rute CRUD Product diproteksi penuh oleh Middleware Auth
 Route::resource('product', ProductController::class)->middleware('auth');
 ```
+
 ### 3.2 Lapisan Pengendali Keamanan (app/Http/Controllers/SiteController.php)
+
 Memvalidasi masukan form login dengan standar eksekusi sistem bawaan (Auth Attempt).
 
 ```PHP
@@ -144,19 +154,19 @@ class SiteController extends Controller
         try {
             // Auth::attempt melakukan pencocokan hash Bcrypt di latar belakang
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-                
+
                 $request->session()->regenerate();
-                
+
                 // Menyimpan nama user ke session statis sebagai fallback/display
                 session()->put('name', Auth::user()->name);
-                
+
                 return redirect()->intended('/product');
             }
 
             // Fallback apabila kredensial salah (tidak spesifik memberitahu mana yang salah)
             return redirect('/login')
                 ->with('msg', 'Otentikasi gagal: Email atau Password tidak valid.');
-                
+
         } catch (\Exception $e) {
             Log::error('Kesalahan Otentikasi Lintas Sistem: ' . $e->getMessage());
             return redirect('/login')->with('msg', 'Terjadi kesalahan internal server.');
@@ -164,7 +174,9 @@ class SiteController extends Controller
     }
 }
 ```
-### 3.3 Skema Migrasi Relasional (database/migrations/..._create_variants_table.php)
+
+### 3.3 Skema Migrasi Relasional (database/migrations/...\_create_variants_table.php)
+
 Membuat tabel detail produk yang dikunci secara struktural ke tabel induk.
 
 ```PHP
@@ -180,20 +192,20 @@ return new class extends Migration
     {
         Schema::create('variants', function (Blueprint $table) {
             $table->id();
-            
+
             // Atribut Variabel
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->string('processor', 100);
             $table->string('memory', 50);
             $table->string('storage', 50);
-            
+
             // Relasi Foreign Key dengan referensi tabel `products`
             // onDelete('cascade') opsional: jika produk dihapus, variannya terhapus otomatis
             $table->foreignId('product_id')
                   ->constrained('products')
                   ->onDelete('cascade');
-                  
+
             $table->timestamps();
         });
     }
@@ -204,7 +216,9 @@ return new class extends Migration
     }
 };
 ```
+
 ### 3.4 Representasi Model Relasional ORM
+
 Model Product.php (Posisi Induk):
 
 ```PHP
@@ -218,7 +232,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = ['name', 'price'];
 
     // Menandakan 1 Produk berhak memiliki banyak Varian
@@ -228,6 +242,7 @@ class Product extends Model
     }
 }
 ```
+
 Model Variant.php (Posisi Anak):
 
 ```PHP
@@ -241,10 +256,10 @@ use Illuminate\Database\Eloquent\Model;
 class Variant extends Model
 {
     use HasFactory;
-    
+
     // Melindungi Mass-Assignment
     protected $fillable = [
-        'name', 'description', 'processor', 
+        'name', 'description', 'processor',
         'memory', 'storage', 'product_id'
     ];
 
@@ -255,7 +270,9 @@ class Variant extends Model
     }
 }
 ```
+
 ### 3.5 Pembaruan Layout Template Induk (resources/views/template.blade.php)
+
 Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan sesi.
 
 ```HTML
@@ -265,8 +282,8 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
-    <link 
-        href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)" 
+    <link
+        href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)"
         rel="stylesheet"
     >
 </head>
@@ -289,13 +306,15 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
         @yield('content')
     </div>
 
-    <script 
+    <script
         src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js)">
     </script>
 </body>
 </html>
 ```
+
 ### 3.6 Modifikasi Tampilan Tabel dengan Nested Data (resources/views/products/index.blade.php)
+
 Menarik data relasional secara dinamis dari Model ke layar antarmuka pengguna.
 
 ```HTML
@@ -313,7 +332,7 @@ Menarik data relasional secara dinamis dari Model ke layar antarmuka pengguna.
         <tr>
             <td class="align-middle fw-bold">{{ $d->name }}</td>
             <td class="align-middle">{{ number_format($d->price, 0, ',', '.') }}</td>
-            
+
             <td class="align-middle">
                 <ul class="mb-0 text-muted" style="font-size: 0.9em;">
                     @foreach ($d->variants as $var)
@@ -326,7 +345,7 @@ Menarik data relasional secara dinamis dari Model ke layar antarmuka pengguna.
                     @endforeach
                 </ul>
             </td>
-            
+
             <td class="align-middle text-center">
                 </td>
         </tr>
@@ -339,62 +358,71 @@ HASIL TAMPILAN WEB (OUTPUT)
 Berikut adalah dokumentasi tangkapan layar (screenshot) implementasi operasi keamanan logikal dan pemanggilan kerangka data berelasi (Database Relational Mapping):
 
 1. Tampilan Halaman Login (Proteksi Awal)
-Deskripsi: Menampilkan form masuk yang wajib diisi. Apabila URL /product dipaksa diakses tanpa sesi, pengguna akan selalu terpantul ke halaman ini oleh Middleware.
-<img width="1330" height="602" alt="Screenshot 2026-04-25 142259" src="https://github.com/user-attachments/assets/1ddd46d0-ccfa-4f40-80bc-09fabfe28919" />
-
+   Deskripsi: Menampilkan form masuk yang wajib diisi. Apabila URL /product dipaksa diakses tanpa sesi, pengguna akan selalu terpantul ke halaman ini oleh Middleware.
+   <img width="1330" height="602" alt="Screenshot Halaman Login" src="tampilanlogin.png" />
 
 2. Tampilan Header Auth di Layout Global
-Deskripsi: Visualisasi directive @auth yang berhasil mengidentifikasi nama user yang sedang login beserta ketersediaan tombol eksekusi "Logout Keamanan".
-<img width="606" height="160" alt="Screenshot 2026-04-25 142249" src="https://github.com/user-attachments/assets/80c1c6db-a1eb-4505-babc-fde25cdc37a9" />
+   Deskripsi: Visualisasi directive @auth yang berhasil mengidentifikasi nama user yang sedang login beserta ketersediaan tombol eksekusi "Logout Keamanan".
+   <img width="606" height="160" alt="Screenshot Header Auth" src="tampilanafterlogin.png" />
 
 3. Tampilan Halaman Daftar Produk & Varian (One-to-Many Output)
-Deskripsi: Visualisasi dari arsitektur Object-Relational Mapping yang merender kumpulan atribut turunan variants langsung berdampingan dengan entitas induk products secara struktural.
-<img width="1836" height="770" alt="Screenshot 2026-04-25 142213" src="https://github.com/user-attachments/assets/5eea1a00-80e9-44b6-a1d8-a4c118fc9db5" />
-
+   Deskripsi: Visualisasi dari arsitektur Object-Relational Mapping yang merender kumpulan atribut turunan variants langsung berdampingan dengan entitas induk products secara struktural.
+   <img width="1836" height="770" alt="Screenshot Halaman Produk" src="tampilanhalamanproduk.png" />
 
 # TUGAS PERTEMUAN 8
-1. jelaskan tentang git branch 
- - apa itu git branch 
-- buatlah git branch dengan 2 akun berbeda dan hubungkan dengan project yang di buat di tugas 2 ( bisa dengan antar teman kelas 
-- kalian jelaskan apa saja fungsi nya dan apa keuntungan git branch 
+
+1. jelaskan tentang git branch
+
+- apa itu git branch
+- buatlah git branch dengan 2 akun berbeda dan hubungkan dengan project yang di buat di tugas 2 ( bisa dengan antar teman kelas
+- kalian jelaskan apa saja fungsi nya dan apa keuntungan git branch
 - buat juga output dan input apa saja yang dapat kalian lakukan mengunakan git branch
-2. buatlah website ( bisa mengunakan website yang di gunnakan dalam tubes ) , lalu tambahkan database yang terhubung dengan local house 
+
+2. buatlah website ( bisa mengunakan website yang di gunnakan dalam tubes ) , lalu tambahkan database yang terhubung dengan local house
+
 ## JAWAB
+
 ### 1. git branch
 
-  - Git branch adalah fitur dalam Git yang berfungsi menciptakan ruang kerja terpisah (cabang) dari repositori utama (main/master). Ini memungkinkan pengembang bereksperimen, memperbaiki     bug, atau menambahkan fitur baru tanpa memengaruhi kode utama yang stabil. Branch bertindak sebagai pointer ringan yang bergerak otomatis setiap ada commit.
-  - 
-  - Fungsi dan Keuntungan Git Branch
-    - Fungsi Utama:
-  Isolasi Kode: Memisahkan pekerjaan yang sedang berjalan dari kode utama yang sudah stabil (production-ready).
-  Kolaborasi Tim: Memungkinkan banyak developer mengerjakan fitur yang berbeda-beda di dalam satu proyek yang sama pada waktu yang bersamaan.
-  Manajemen Rilis: Memisahkan versi aplikasi (misalnya: branch untuk development, testing, dan production).
+- Git branch adalah fitur dalam Git yang berfungsi menciptakan ruang kerja terpisah (cabang) dari repositori utama (main/master). Ini memungkinkan pengembang bereksperimen, memperbaiki bug, atau menambahkan fitur baru tanpa memengaruhi kode utama yang stabil. Branch bertindak sebagai pointer ringan yang bergerak otomatis setiap ada commit.
+-
+- Fungsi dan Keuntungan Git Branch
+  - Fungsi Utama:
+    Isolasi Kode: Memisahkan pekerjaan yang sedang berjalan dari kode utama yang sudah stabil (production-ready).
+    Kolaborasi Tim: Memungkinkan banyak developer mengerjakan fitur yang berbeda-beda di dalam satu proyek yang sama pada waktu yang bersamaan.
+    Manajemen Rilis: Memisahkan versi aplikasi (misalnya: branch untuk development, testing, dan production).
 
-    - Keuntungan Menggunakan Git Branch:
+  - Keuntungan Menggunakan Git Branch:
     Aman dari Error Fatal: Jika kodingan di branch baru ternyata error atau berantakan, kode di branch utama (main) tidak akan terpengaruh sama sekali.
     Pengembangan Paralel: Kamu dan temanmu bisa bekerja di detik yang sama, mengedit file yang sama, tanpa harus saling tunggu.
     Code Review Lebih Rapi: Memudahkan proses pengecekan kode sebelum digabungkan (biasanya melalui proses Pull Request / Merge Request).
     Mudah Berpindah Konteks: Kamu bisa lompat dari mengerjakan "Fitur A" ke "Perbaikan Bug B" hanya dengan berganti branch, tanpa perlu membuat folder project baru di laptop.
-  - 
+
+-
+
 ### 2. Website
+
 # 🔥 Sistem Manajemen Inventaris Gudang Sembako (Tugas 8)
 
-Proyek ini dibangun menggunakan **Laravel 11** dan ditujukan untuk mengimplementasikan manajemen basis data relasional (MySQL) dengan skema autentikasi komprehensif dari bawaan **Laravel Breeze**. 
+Proyek ini dibangun menggunakan **Laravel 11** dan ditujukan untuk mengimplementasikan manajemen basis data relasional (MySQL) dengan skema autentikasi komprehensif dari bawaan **Laravel Breeze**.
 
-Aplikasi ini dikhususkan untuk toko retail/gudang dan telah di-desain menggunakan **Tailwind CSS** untuk menawarkan *User Experience* (UX) premium melalui desain *Glassmorphism*, palet gradien profesional, dan visualisasi *Dashboard* interaktif.
+Aplikasi ini dikhususkan untuk toko retail/gudang dan telah di-desain menggunakan **Tailwind CSS** untuk menawarkan _User Experience_ (UX) premium melalui desain _Glassmorphism_, palet gradien profesional, dan visualisasi _Dashboard_ interaktif.
 
 ## 🚀 Fitur Unggulan
+
 1. **Keamanan Ekstra (Laravel Breeze):** Sistem pendataan terkunci sepenuhnya; orang tak dikenal tidak dapat mengintip stok barang jika tidak melakukan otentikasi login terlebih dahulu.
 2. **Dashboard HUD (Heads-up Display):** Menampilkan rekapitulasi Total Produk, Kalkulasi Nilai Estimasi Aset Rupiah, dan Batas Stok Minimum.
 3. **Peringatan Kondisi Stok Menipis:** Jika unit sembako berada di bawah batas tertentu (<10 barang), indikator merah berkedip peringatan krisis langsung menyala.
-4. **Antarmuka Kosmetik Premium:** Desain khusus dengan manipulasi grid asimetris Tailwind, *backdrop-blur*, kompilasi kelas terenkapsulasi oleh Vite, hingga manipulasi kartu barang animasi.
+4. **Antarmuka Kosmetik Premium:** Desain khusus dengan manipulasi grid asimetris Tailwind, _backdrop-blur_, kompilasi kelas terenkapsulasi oleh Vite, hingga manipulasi kartu barang animasi.
 
 ---
 
 ## 💻 Source Code Inti Sistem
-*Berikut adalah representasi kode esensial (MVC) yang digunakan di dalam `modul-13/tugas-8`.*
+
+_Berikut adalah representasi kode esensial (MVC) yang digunakan di dalam `modul-13/tugas-8`._
 
 ### 1. File Konfigurasi Lintas Server (`.env`)
+
 Diatur pada modul ini agar merujuk ke layanan **MySQL Laragon** dengan basis data `sembako_db`.
 
 ```env
@@ -405,7 +433,9 @@ DB_DATABASE=sembako_db
 DB_USERNAME=root
 DB_PASSWORD=cilacap
 ```
+
 ### 2. Algoritme Pengendali Rute (routes/web.php)
+
 Mengarahkan tamu aplikasi langsung ke landing page, sementara kontrol manajemen dilindungi berlapis oleh alias validasi auth.
 
 ```php
@@ -423,14 +453,16 @@ Route::get('/dashboard', function () {
 // CRUD Products dikunci Auth Session
 Route::middleware('auth')->group(function () {
     Route::resource('product', ProductController::class);
-    
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 require __DIR__.'/auth.php';
 ```
-### 3. Migrasi DDL Database (database/migrations/..._create_products_table.php)
+
+### 3. Migrasi DDL Database (database/migrations/...\_create_products_table.php)
+
 Mendefinisikan skema kolom pendataan barang sembako langsung ke MariaDB/MySQL.
 
 ```php
@@ -458,7 +490,9 @@ return new class extends Migration
     }
 };
 ```
+
 ### 4. Pelindung Mass-Assignment (app/Models/Product.php)
+
 Entitas objek model yang bertanggung jawab memvalidasi field mana saja yang diizinkan mendapat perintah Create massal.
 
 ```php
@@ -478,7 +512,9 @@ class Product extends Model
     ];
 }
 ```
+
 ### 5. Controller Logika Bisnis (app/Http/Controllers/ProductController.php)
+
 Menghubungkan Interface (Views) dengan basis data melalui penguraian input form yang kokoh (validated request).
 
 ```php
@@ -532,87 +568,120 @@ class ProductController extends Controller
     }
 }
 ```
+
 ### 6. Tampilan Tabel Dasbor Premium (resources/views/product/index.blade.php)
+
 Visualisasi terpadu perihal statistik gudang lengkap dengan badge list unik Tailwind CSS. (Karena terlalu panjang, ini adalah ringkasan inti visualnya)
 
 ```html
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
-                📦 Manajemen Inventaris Sembako
-            </h2>
-            <a href="{{ route('product.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 rounded-xl text-white font-medium shadow-xl hover:scale-105">
-                Tambah Produk
-            </a>
-        </div>
-    </x-slot>
-    <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        
-        <!-- Summary Cards Layout -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
-                <p>Total Produk: <strong>{{ count($products) }} Items</strong></p>
-            </div>
-            <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
-                <p>Estimasi Aset: <strong>Rp{{ number_format((float)($products->sum(function($p) { return $p->price * $p->stock; })), 0, ',', '.') }}</strong></p>
-            </div>
-        </div>
-        <!-- Tabel Render Area -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
-            <table class="min-w-full divide-y divide-gray-100">
-                <thead class="bg-gray-50/50">
-                    <tr>
-                        <th>NAMA BARANG</th>
-                        <th>KATEGORI</th>
-                        <th>HARGA</th>
-                        <th>STOK</th>
-                        <th>AKSI</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-50">
-                    @forelse ($products as $p)
-                        <tr class="hover:bg-emerald-50/30">
-                            <td>{{ $p->name }} <br> <small>{{ $p->description }}</small></td>
-                            <td><span class="badge {{ $p->category }}">{{ $p->category }}</span></td>
-                            <td>Rp {{ number_format($p->price, 0, ',', '.') }}</td>
-                            <td>
-                                <span class="{{ $p->stock < 10 ? 'text-red-500' : 'text-emerald-600' }}">{{ $p->stock }}</span>
-                                @if($p->stock < 10) <small class="text-red-500 animate-pulse">Limit</small> @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('product.edit', $p->id) }}">Edit</a>
-                                <form action="{{ route('product.destroy', $p->id) }}" method="POST">
-                                    @csrf @method('DELETE')
-                                    <button type="submit">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="5" class="text-center">Inventaris Sembako Kosong.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+  <x-slot name="header">
+    <div class="flex justify-between items-center">
+      <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+        📦 Manajemen Inventaris Sembako
+      </h2>
+      <a
+        href="{{ route('product.create') }}"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 rounded-xl text-white font-medium shadow-xl hover:scale-105"
+      >
+        Tambah Produk
+      </a>
     </div>
+  </x-slot>
+  <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <!-- Summary Cards Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
+        <p>Total Produk: <strong>{{ count($products) }} Items</strong></p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
+        <p>
+          Estimasi Aset:
+          <strong
+            >Rp{{ number_format((float)($products->sum(function($p) { return
+            $p->price * $p->stock; })), 0, ',', '.') }}</strong
+          >
+        </p>
+      </div>
+    </div>
+    <!-- Tabel Render Area -->
+    <div
+      class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100"
+    >
+      <table class="min-w-full divide-y divide-gray-100">
+        <thead class="bg-gray-50/50">
+          <tr>
+            <th>NAMA BARANG</th>
+            <th>KATEGORI</th>
+            <th>HARGA</th>
+            <th>STOK</th>
+            <th>AKSI</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-50">
+          @forelse ($products as $p)
+          <tr class="hover:bg-emerald-50/30">
+            <td>
+              {{ $p->name }} <br />
+              <small>{{ $p->description }}</small>
+            </td>
+            <td>
+              <span class="badge {{ $p->category }}">{{ $p->category }}</span>
+            </td>
+            <td>Rp {{ number_format($p->price, 0, ',', '.') }}</td>
+            <td>
+              <span
+                class="{{ $p->stock < 10 ? 'text-red-500' : 'text-emerald-600' }}"
+                >{{ $p->stock }}</span
+              >
+              @if($p->stock < 10)
+              <small class="text-red-500 animate-pulse">Limit</small> @endif
+            </td>
+            <td>
+              <a href="{{ route('product.edit', $p->id) }}">Edit</a>
+              <form
+                action="{{ route('product.destroy', $p->id) }}"
+                method="POST"
+              >
+                @csrf @method('DELETE')
+                <button type="submit">Hapus</button>
+              </form>
+            </td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="5" class="text-center">Inventaris Sembako Kosong.</td>
+          </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </div>
 </x-app-layout>
 ```
 
 ## OUTPUT WEBSITE (SS)
+
 ### 1. landing page
+
 <img width="1787" height="950" alt="Screenshot 2026-04-25 150524" src="https://github.com/user-attachments/assets/e3df95bb-8660-4b70-95ff-8f0abb327bb6" />
 
 ### 2. Register
+
 <img width="1290" height="952" alt="Screenshot 2026-04-25 150551" src="https://github.com/user-attachments/assets/c2e39fbb-9f27-4337-8d19-a540bc55fb87" />
 
 ### 3. Login
+
 <img width="1304" height="847" alt="Screenshot 2026-04-25 150540" src="https://github.com/user-attachments/assets/a3e77e5c-27b3-4452-b093-40b90ea39e46" />
 
 ### 4. Dashboard admin
+
 <img width="1426" height="962" alt="Screenshot 2026-04-25 150928" src="https://github.com/user-attachments/assets/d72102e5-bffe-4e89-82e2-f3fc829c587a" />
 
 ### 5. Tambah Data
+
 <img width="1534" height="973" alt="Screenshot 2026-04-25 150627" src="https://github.com/user-attachments/assets/9f8c1938-c906-43d0-8415-e085da4d85e3" />
 
 ### 6. Edit Data
+
 <img width="1300" height="970" alt="Screenshot 2026-04-25 150942" src="https://github.com/user-attachments/assets/653dc574-71e1-4dc2-b5b8-bf5fc05c4bbb" />
