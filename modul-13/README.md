@@ -22,8 +22,8 @@
   <h3>Disusun Oleh :</h3>
 
   <p>
-    <strong>Arnanda Setya Nosa Putra</strong><br>
-    <strong>2311102180</strong><br>
+    <strong>Arvan Murbiyanto</strong><br>
+    <strong>2311102074</strong><br>
     <strong>S1 IF-11-04</strong>
   </p>
 
@@ -102,6 +102,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\ProductController;
 
+Route::get('/', function () {
+    return redirect('/product');
+});
+
 // Rute Tampilan Login dengan pengecekan sesi aktif
 Route::get('/login', function () {
     if (Auth::check()) {
@@ -116,16 +120,17 @@ Route::post('/login', [SiteController::class, 'auth'])->name('login.post');
 // Rute Pemusnahan Sesi (Logout)
 Route::get('/logout', function () {
     Auth::logout();
-
+    
     // Invalidate sesi secara total guna memitigasi Session Fixation Attack
     session()->invalidate();
     session()->regenerateToken();
-
+    
     return redirect('/login');
 })->name('logout');
 
 // Rute CRUD Product diproteksi penuh oleh Middleware Auth
 Route::resource('product', ProductController::class)->middleware('auth');
+
 ```
 
 ### 3.2 Lapisan Pengendali Keamanan (app/Http/Controllers/SiteController.php)
@@ -154,25 +159,26 @@ class SiteController extends Controller
         try {
             // Auth::attempt melakukan pencocokan hash Bcrypt di latar belakang
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-
+                
                 $request->session()->regenerate();
-
+                
                 // Menyimpan nama user ke session statis sebagai fallback/display
                 session()->put('name', Auth::user()->name);
-
+                
                 return redirect()->intended('/product');
             }
 
             // Fallback apabila kredensial salah (tidak spesifik memberitahu mana yang salah)
             return redirect('/login')
                 ->with('msg', 'Otentikasi gagal: Email atau Password tidak valid.');
-
+                
         } catch (\Exception $e) {
             Log::error('Kesalahan Otentikasi Lintas Sistem: ' . $e->getMessage());
             return redirect('/login')->with('msg', 'Terjadi kesalahan internal server.');
         }
     }
 }
+
 ```
 
 ### 3.3 Skema Migrasi Relasional (database/migrations/...\_create_variants_table.php)
@@ -192,20 +198,19 @@ return new class extends Migration
     {
         Schema::create('variants', function (Blueprint $table) {
             $table->id();
-
+            
             // Atribut Variabel
             $table->string('name', 100);
             $table->text('description')->nullable();
-            $table->string('processor', 100);
-            $table->string('memory', 50);
-            $table->string('storage', 50);
-
+            $table->string('mesin', 100);
+            $table->string('fitur', 255);
+            
             // Relasi Foreign Key dengan referensi tabel `products`
             // onDelete('cascade') opsional: jika produk dihapus, variannya terhapus otomatis
             $table->foreignId('product_id')
                   ->constrained('products')
                   ->onDelete('cascade');
-
+                  
             $table->timestamps();
         });
     }
@@ -278,38 +283,60 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
 ```HTML
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
-    <link
-        href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)"
-        rel="stylesheet"
-    >
-</head>
-<body class="bg-light" style="width: 95%; margin: 0 auto;">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    @auth
-        <div class="row justify-content-end mt-4 mb-2">
-            <div class="col-md-4 text-end">
-                <span class="fw-bold me-3 text-secondary">
-                    Selamat datang, {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('logout') }}" class="btn btn-sm btn-danger shadow-sm">
-                    Logout Keamanan
+    <style>
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container mt-4">
+
+        @auth
+            <div class="top-bar d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <small class="text-muted">Login sebagai</small><br>
+                    <span class="fw-semibold">{{ Auth::user()->name }}</span>
+                </div>
+
+                <a href="{{ route('logout') }}" class="btn btn-sm"
+                    style="background:#ef4444; color:white; border-radius:6px;">
+                    Logout
                 </a>
             </div>
-        </div>
-    @endauth
+        @endauth
 
-    <div class="row justify-content-center mt-3">
-        @yield('content')
+        <div>
+            @yield('content')
+        </div>
+
     </div>
 
-    <script
-        src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js)">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
 ```
 
@@ -318,40 +345,47 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
 Menarik data relasional secara dinamis dari Model ke layar antarmuka pengguna.
 
 ```HTML
-<table class="table table-hover table-bordered m-0 bg-white">
-    <thead class="table-dark">
-        <tr>
-            <th>Nama Produk Utama</th>
-            <th>Harga (Rp)</th>
-            <th>Spesifikasi Varian Terkait</th>
-            <th class="text-center">Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($products as $d)
-        <tr>
-            <td class="align-middle fw-bold">{{ $d->name }}</td>
-            <td class="align-middle">{{ number_format($d->price, 0, ',', '.') }}</td>
-
-            <td class="align-middle">
-                <ul class="mb-0 text-muted" style="font-size: 0.9em;">
-                    @foreach ($d->variants as $var)
-                        <li class="mb-2">
-                            <strong class="text-dark">{{ $var->name }}</strong><br>
-                            Processor: {{ $var->processor }} <br>
-                            RAM: {{ $var->memory }} | Storage: {{ $var->storage }} <br>
-                            <span class="fst-italic">{{ $var->description }}</span>
-                        </li>
-                    @endforeach
-                </ul>
-            </td>
-
-            <td class="align-middle text-center">
+ <table class="table table-hover table-bordered m-0 bg-white shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Nama Produk Utama</th>
+                <th>Harga (Rp)</th>
+                <th>Spesifikasi Varian Terkait</th>
+                <th class="text-center">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($products as $d)
+            <tr>
+                <td class="align-middle fw-bold">{{ $d->name }}</td>
+                <td class="align-middle">{{ number_format($d->price, 0, ',', '.') }}</td>
+                
+                <td class="align-middle">
+                    <ul class="mb-0 text-muted" style="font-size: 0.9em; padding-left: 1.2rem;">
+                        @foreach ($d->variants as $var)
+                            <li class="mb-2">
+                                <strong class="text-dark">{{ $var->name }}</strong><br>
+                                Mesin: {{ $var->mesin }} <br>
+                                Fitur: {{ $var->fitur }} <br>
+                                <span class="fst-italic">{{ $var->description }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+                
+                <td class="align-middle text-center">
+                    <button class="btn btn-sm btn-primary">Edit</button>
+                    <button class="btn btn-sm btn-danger">Hapus</button>
+                </td>
+            </tr>
+            @endforeach
+            @if($products->isEmpty())
+            <tr>
+                <td colspan="4" class="text-center py-4 text-muted">Belum ada data produk tersedia.</td>
+            </tr>
+            @endif
+        </tbody>
+    </table>
 ```
 
 HASIL TAMPILAN WEB (OUTPUT)
