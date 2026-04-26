@@ -24,8 +24,8 @@
                         @foreach ($d->variants as $var)
                             <li class="mb-2">
                                 <strong class="text-dark">{{ $var->name }}</strong><br>
-                                Processor: {{ $var->processor }} <br>
-                                RAM: {{ $var->memory }} | Storage: {{ $var->storage }} <br>
+                                Mesin: {{ $var->mesin }} <br>
+                                Fitur: {{ $var->fitur }} <br>
                                 <span class="fst-italic">{{ $var->description }}</span>
                             </li>
                         @endforeach

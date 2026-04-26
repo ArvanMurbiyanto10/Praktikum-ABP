@@ -2,31 +2,46 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="col-md-4 mt-5">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-dark text-white text-center">
-            <h5 class="mb-0">Secure Login</h5>
-        </div>
-        <div class="card-body">
-            @if (session('msg'))
-                <div class="alert alert-danger" role="alert">
-                    {{ session('msg') }}
-                </div>
-            @endif
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-4">
+            <div class="p-4" style="border: 1px solid #ddd; border-radius: 12px; background: #f9fafb;">
 
-            <form action="{{ route('login.post') }}" method="POST">
-                @csrf
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" required value="{{ old('email') }}">
+                <div class="text-center mb-4">
+                    <h4 style="font-weight: 600;">Welcome Back</h4>
+                    <small class="text-muted">Silakan login untuk melanjutkan</small>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+
+                @if (session('msg'))
+                    <div class="alert alert-warning text-center">
+                        {{ session('msg') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('login.post') }}" method="POST">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Email</label>
+                        <input type="email" class="form-control" name="email" placeholder="contoh@email.com" required
+                            value="{{ old('email') }}" style="border-radius: 8px;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Password</label>
+                        <input type="password" class="form-control" name="password" placeholder="••••••••" required
+                            style="border-radius: 8px;">
+                    </div>
+
+                    <button type="submit" class="btn w-100" style="background: #4f46e5; color: white; border-radius: 8px;">
+                        Masuk
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">© Sistem Login Sederhana</small>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+
+            </div>
         </div>
     </div>
-</div>
 @endsection

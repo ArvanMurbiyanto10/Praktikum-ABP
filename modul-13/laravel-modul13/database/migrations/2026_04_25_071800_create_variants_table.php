@@ -14,9 +14,8 @@ return new class extends Migration
             // Atribut Variabel
             $table->string('name', 100);
             $table->text('description')->nullable();
-            $table->string('processor', 100);
-            $table->string('memory', 50);
-            $table->string('storage', 50);
+            $table->string('mesin', 100);
+            $table->string('fitur', 255);
             
             // Relasi Foreign Key dengan referensi tabel `products`
             // onDelete('cascade') opsional: jika produk dihapus, variannya terhapus otomatis

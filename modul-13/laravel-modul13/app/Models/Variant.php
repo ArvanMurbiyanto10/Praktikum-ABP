@@ -11,8 +11,8 @@ class Variant extends Model
     
     // Melindungi Mass-Assignment
     protected $fillable = [
-        'name', 'description', 'processor', 
-        'memory', 'storage', 'product_id'
+        'name', 'description', 'mesin', 
+        'fitur', 'product_id'
     ];
 
     // Menandakan spesifikasi Varian ini merupakan milik 1 Produk mutlak
