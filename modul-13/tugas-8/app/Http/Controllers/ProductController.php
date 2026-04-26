@@ -21,16 +21,18 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'part_number' => 'required|unique:products,part_number',
             'name' => 'required',
             'category' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image_url' => 'nullable|url',
             'description' => 'nullable',
         ]);
 
         Product::create($request->all());
 
-        return redirect()->route('product.index')->with('success', 'Produk sembako berhasil ditambahkan.');
+        return redirect()->route('product.index')->with('success', 'Suku cadang berhasil ditambahkan ke stok.');
     }
 
     public function edit(Product $product)
@@ -41,21 +43,23 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $request->validate([
+            'part_number' => 'required|unique:products,part_number,' . $product->id,
             'name' => 'required',
             'category' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image_url' => 'nullable|url',
             'description' => 'nullable',
         ]);
 
         $product->update($request->all());
 
-        return redirect()->route('product.index')->with('success', 'Produk sembako berhasil diupdate.');
+        return redirect()->route('product.index')->with('success', 'Data suku cadang berhasil diperbarui.');
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('product.index')->with('success', 'Produk sembako berhasil dihapus.');
+        return redirect()->route('product.index')->with('success', 'Suku cadang berhasil dihapus dari sistem.');
     }
 }
