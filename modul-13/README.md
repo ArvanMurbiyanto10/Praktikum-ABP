@@ -22,7 +22,7 @@
   <h3>Disusun Oleh :</h3>
 
   <p>
-    <strong>Arvan Murbiyanto</strong><br>
+    <strong>Arvan Mrbiyanto</strong><br>
     <strong>2311102074</strong><br>
     <strong>S1 IF-11-04</strong>
   </p>
@@ -102,10 +102,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\ProductController;
 
-Route::get('/', function () {
-    return redirect('/product');
-});
-
 // Rute Tampilan Login dengan pengecekan sesi aktif
 Route::get('/login', function () {
     if (Auth::check()) {
@@ -120,17 +116,16 @@ Route::post('/login', [SiteController::class, 'auth'])->name('login.post');
 // Rute Pemusnahan Sesi (Logout)
 Route::get('/logout', function () {
     Auth::logout();
-    
+
     // Invalidate sesi secara total guna memitigasi Session Fixation Attack
     session()->invalidate();
     session()->regenerateToken();
-    
+
     return redirect('/login');
 })->name('logout');
 
 // Rute CRUD Product diproteksi penuh oleh Middleware Auth
 Route::resource('product', ProductController::class)->middleware('auth');
-
 ```
 
 ### 3.2 Lapisan Pengendali Keamanan (app/Http/Controllers/SiteController.php)
@@ -159,26 +154,25 @@ class SiteController extends Controller
         try {
             // Auth::attempt melakukan pencocokan hash Bcrypt di latar belakang
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-                
+
                 $request->session()->regenerate();
-                
+
                 // Menyimpan nama user ke session statis sebagai fallback/display
                 session()->put('name', Auth::user()->name);
-                
+
                 return redirect()->intended('/product');
             }
 
             // Fallback apabila kredensial salah (tidak spesifik memberitahu mana yang salah)
             return redirect('/login')
                 ->with('msg', 'Otentikasi gagal: Email atau Password tidak valid.');
-                
+
         } catch (\Exception $e) {
             Log::error('Kesalahan Otentikasi Lintas Sistem: ' . $e->getMessage());
             return redirect('/login')->with('msg', 'Terjadi kesalahan internal server.');
         }
     }
 }
-
 ```
 
 ### 3.3 Skema Migrasi Relasional (database/migrations/...\_create_variants_table.php)
@@ -198,19 +192,20 @@ return new class extends Migration
     {
         Schema::create('variants', function (Blueprint $table) {
             $table->id();
-            
+
             // Atribut Variabel
             $table->string('name', 100);
             $table->text('description')->nullable();
-            $table->string('mesin', 100);
-            $table->string('fitur', 255);
-            
+            $table->string('processor', 100);
+            $table->string('memory', 50);
+            $table->string('storage', 50);
+
             // Relasi Foreign Key dengan referensi tabel `products`
             // onDelete('cascade') opsional: jika produk dihapus, variannya terhapus otomatis
             $table->foreignId('product_id')
                   ->constrained('products')
                   ->onDelete('cascade');
-                  
+
             $table->timestamps();
         });
     }
@@ -283,60 +278,38 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
 ```HTML
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f1f5f9;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .main-container {
-            max-width: 900px;
-            margin: auto;
-        }
-
-        .top-bar {
-            background: white;
-            padding: 12px 18px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+    <link
+        href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)"
+        rel="stylesheet"
+    >
 </head>
+<body class="bg-light" style="width: 95%; margin: 0 auto;">
 
-<body>
-
-    <div class="main-container mt-4">
-
-        @auth
-            <div class="top-bar d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <small class="text-muted">Login sebagai</small><br>
-                    <span class="fw-semibold">{{ Auth::user()->name }}</span>
-                </div>
-
-                <a href="{{ route('logout') }}" class="btn btn-sm"
-                    style="background:#ef4444; color:white; border-radius:6px;">
-                    Logout
+    @auth
+        <div class="row justify-content-end mt-4 mb-2">
+            <div class="col-md-4 text-end">
+                <span class="fw-bold me-3 text-secondary">
+                    Selamat datang, {{ Auth::user()->name }}
+                </span>
+                <a href="{{ route('logout') }}" class="btn btn-sm btn-danger shadow-sm">
+                    Logout Keamanan
                 </a>
             </div>
-        @endauth
-
-        <div>
-            @yield('content')
         </div>
+    @endauth
 
+    <div class="row justify-content-center mt-3">
+        @yield('content')
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js)">
+    </script>
 </body>
-
 </html>
 ```
 
@@ -345,47 +318,40 @@ Menggunakan directive Blade @auth untuk mendeteksi visibilitas menu berdasarkan 
 Menarik data relasional secara dinamis dari Model ke layar antarmuka pengguna.
 
 ```HTML
- <table class="table table-hover table-bordered m-0 bg-white shadow-sm">
-        <thead class="table-dark">
-            <tr>
-                <th>Nama Produk Utama</th>
-                <th>Harga (Rp)</th>
-                <th>Spesifikasi Varian Terkait</th>
-                <th class="text-center">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($products as $d)
-            <tr>
-                <td class="align-middle fw-bold">{{ $d->name }}</td>
-                <td class="align-middle">{{ number_format($d->price, 0, ',', '.') }}</td>
-                
-                <td class="align-middle">
-                    <ul class="mb-0 text-muted" style="font-size: 0.9em; padding-left: 1.2rem;">
-                        @foreach ($d->variants as $var)
-                            <li class="mb-2">
-                                <strong class="text-dark">{{ $var->name }}</strong><br>
-                                Mesin: {{ $var->mesin }} <br>
-                                Fitur: {{ $var->fitur }} <br>
-                                <span class="fst-italic">{{ $var->description }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
+<table class="table table-hover table-bordered m-0 bg-white">
+    <thead class="table-dark">
+        <tr>
+            <th>Nama Produk Utama</th>
+            <th>Harga (Rp)</th>
+            <th>Spesifikasi Varian Terkait</th>
+            <th class="text-center">Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($products as $d)
+        <tr>
+            <td class="align-middle fw-bold">{{ $d->name }}</td>
+            <td class="align-middle">{{ number_format($d->price, 0, ',', '.') }}</td>
+
+            <td class="align-middle">
+                <ul class="mb-0 text-muted" style="font-size: 0.9em;">
+                    @foreach ($d->variants as $var)
+                        <li class="mb-2">
+                            <strong class="text-dark">{{ $var->name }}</strong><br>
+                            Processor: {{ $var->processor }} <br>
+                            RAM: {{ $var->memory }} | Storage: {{ $var->storage }} <br>
+                            <span class="fst-italic">{{ $var->description }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </td>
+
+            <td class="align-middle text-center">
                 </td>
-                
-                <td class="align-middle text-center">
-                    <button class="btn btn-sm btn-primary">Edit</button>
-                    <button class="btn btn-sm btn-danger">Hapus</button>
-                </td>
-            </tr>
-            @endforeach
-            @if($products->isEmpty())
-            <tr>
-                <td colspan="4" class="text-center py-4 text-muted">Belum ada data produk tersedia.</td>
-            </tr>
-            @endif
-        </tbody>
-    </table>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
 ```
 
 HASIL TAMPILAN WEB (OUTPUT)
@@ -436,18 +402,18 @@ Berikut adalah dokumentasi tangkapan layar (screenshot) implementasi operasi kea
 
 ### 2. Website
 
-# 🔥 Sistem Manajemen Inventaris Gudang Sembako (Tugas 8)
+# Sistem Manajemen Showroom & Inventaris Honda (Tugas 8)
 
-Proyek ini dibangun menggunakan **Laravel 11** dan ditujukan untuk mengimplementasikan manajemen basis data relasional (MySQL) dengan skema autentikasi komprehensif dari bawaan **Laravel Breeze**.
+Proyek ini dibangun menggunakan Laravel 11 dan ditujukan untuk mengimplementasikan manajemen basis data relasional (MySQL) dengan skema autentikasi komprehensif dari bawaan Laravel Breeze.
 
-Aplikasi ini dikhususkan untuk toko retail/gudang dan telah di-desain menggunakan **Tailwind CSS** untuk menawarkan _User Experience_ (UX) premium melalui desain _Glassmorphism_, palet gradien profesional, dan visualisasi _Dashboard_ interaktif.
+Aplikasi ini dikhususkan untuk toko retail/gudang dan telah di-desain menggunakan Tailwind CSS untuk menawarkan User Experience (UX) premium melalui desain Glassmorphism, palet gradien profesional, dan visualisasi Dashboard interaktif.
 
-## 🚀 Fitur Unggulan
+## Fitur Unggulan
 
-1. **Keamanan Ekstra (Laravel Breeze):** Sistem pendataan terkunci sepenuhnya; orang tak dikenal tidak dapat mengintip stok barang jika tidak melakukan otentikasi login terlebih dahulu.
-2. **Dashboard HUD (Heads-up Display):** Menampilkan rekapitulasi Total Produk, Kalkulasi Nilai Estimasi Aset Rupiah, dan Batas Stok Minimum.
-3. **Peringatan Kondisi Stok Menipis:** Jika unit sembako berada di bawah batas tertentu (<10 barang), indikator merah berkedip peringatan krisis langsung menyala.
-4. **Antarmuka Kosmetik Premium:** Desain khusus dengan manipulasi grid asimetris Tailwind, _backdrop-blur_, kompilasi kelas terenkapsulasi oleh Vite, hingga manipulasi kartu barang animasi.
+1. Gatekeeper Security: Seluruh data unit dan pelanggan terlindungi; akses hanya diberikan kepada staf terverifikasi.
+2. Performance Dashboard: Panel kendali utama yang menampilkan Total Unit Ready, Estimasi Nilai Aset (OTR), dan Status Indent.
+3. Inventory Alert: Indikator otomatis untuk suku cadang fast-moving yang menipis atau unit kendaraan dengan stok terbatas (Low Stock Alert).
+4. Aesthetic Branding: Penggunaan aset visual honda1.png hingga honda6.png dalam grid asimetris, memberikan impresi katalog digital premium dengan animasi halus.
 
 ---
 
@@ -463,9 +429,9 @@ Diatur pada modul ini agar merujuk ke layanan **MySQL Laragon** dengan basis dat
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=sembako_db
+DB_DATABASE=honda_db
 DB_USERNAME=root
-DB_PASSWORD=cilacap
+DB_PASSWORD=tegal
 ```
 
 ### 2. Algoritme Pengendali Rute (routes/web.php)
@@ -474,17 +440,19 @@ Mengarahkan tamu aplikasi langsung ke landing page, sementara kontrol manajemen 
 
 ```php
 <?php
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return view('welcome');
 });
-// Alias masuk dasbor dialihkan langsung otomatis ke Menu Sembako
+
 Route::get('/dashboard', function () {
     return redirect()->route('product.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
-// CRUD Products dikunci Auth Session
+
 Route::middleware('auth')->group(function () {
     Route::resource('product', ProductController::class);
 
@@ -492,6 +460,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 require __DIR__.'/auth.php';
 ```
 
@@ -501,28 +470,34 @@ Mendefinisikan skema kolom pendataan barang sembako langsung ke MariaDB/MySQL.
 
 ```php
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->string('part_number')->unique();
             $table->string('name');
-            $table->string('category');
-            $table->integer('price');
+            $table->string('category'); // e.g., Mesin, Transmisi, Kelistrikan, Body
+            $table->decimal('price', 15, 2);
             $table->integer('stock');
+            $table->string('image_url')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('products');
     }
 };
+
 ```
 
 ### 4. Pelindung Mass-Assignment (app/Models/Product.php)
@@ -531,20 +506,27 @@ Entitas objek model yang bertanggung jawab memvalidasi field mana saja yang diiz
 
 ```php
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class Product extends Model
 {
     use HasFactory;
+
     protected $fillable = [
+        'part_number',
         'name',
         'category',
         'price',
         'stock',
-        'description'
+        'image_url',
+        'description',
     ];
 }
+
 ```
 
 ### 5. Controller Logika Bisnis (app/Http/Controllers/ProductController.php)
@@ -553,9 +535,12 @@ Menghubungkan Interface (Views) dengan basis data melalui penguraian input form 
 
 ```php
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use Illuminate\Http\Request;
+
 class ProductController extends Controller
 {
     public function index()
@@ -563,132 +548,265 @@ class ProductController extends Controller
         $products = Product::latest()->get();
         return view('product.index', compact('products'));
     }
+
     public function create()
     {
         return view('product.create');
     }
+
     public function store(Request $request)
     {
         $request->validate([
+            'part_number' => 'required|unique:products,part_number',
             'name' => 'required',
             'category' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image_url' => 'nullable|url',
             'description' => 'nullable',
         ]);
+
         Product::create($request->all());
-        return redirect()->route('product.index')->with('success', 'Pencatatan inventaris sembako berhasil diterapkan!');
+
+        return redirect()->route('product.index')->with('success', 'Suku cadang berhasil ditambahkan ke stok.');
     }
+
     public function edit(Product $product)
     {
         return view('product.edit', compact('product'));
     }
+
     public function update(Request $request, Product $product)
     {
         $request->validate([
+            'part_number' => 'required|unique:products,part_number,' . $product->id,
             'name' => 'required',
             'category' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image_url' => 'nullable|url',
             'description' => 'nullable',
         ]);
+
         $product->update($request->all());
-        return redirect()->route('product.index')->with('success', 'Data harga/stok berhasil diselaraskan dengan server.');
+
+        return redirect()->route('product.index')->with('success', 'Data suku cadang berhasil diperbarui.');
     }
+
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('product.index')->with('success', 'Barang terkait berhasil diturunkan dari etalase gudang.');
+        return redirect()->route('product.index')->with('success', 'Suku cadang berhasil dihapus dari sistem.');
     }
 }
+
 ```
 
 ### 6. Tampilan Tabel Dasbor Premium (resources/views/product/index.blade.php)
 
-Visualisasi terpadu perihal statistik gudang lengkap dengan badge list unik Tailwind CSS. (Karena terlalu panjang, ini adalah ringkasan inti visualnya)
+Visualisasi terpadu perihal statistik gudang lengkap dengan badge list unik Tailwind CSS.
 
 ```html
 <x-app-layout>
   <x-slot name="header">
-    <div class="flex justify-between items-center">
-      <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
-        📦 Manajemen Inventaris Sembako
-      </h2>
-      <a
-        href="{{ route('product.create') }}"
-        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 rounded-xl text-white font-medium shadow-xl hover:scale-105"
-      >
-        Tambah Produk
-      </a>
-    </div>
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+      {{ __('Stok Suku Cadang Honda') }}
+    </h2>
   </x-slot>
-  <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8">
-    <!-- Summary Cards Layout -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
-        <p>Total Produk: <strong>{{ count($products) }} Items</strong></p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 flex items-center gap-4">
-        <p>
-          Estimasi Aset:
-          <strong
-            >Rp{{ number_format((float)($products->sum(function($p) { return
-            $p->price * $p->stock; })), 0, ',', '.') }}</strong
+
+  <div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold">Daftar Suku Cadang</h3>
+            <a
+              href="{{ route('product.create') }}"
+              class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+            >
+              + Tambah Suku Cadang
+            </a>
+          </div>
+
+          @if(session('success'))
+          <div
+            class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6"
+            role="alert"
           >
-        </p>
+            <p>{{ session('success') }}</p>
+          </div>
+          @endif
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+              <thead>
+                <tr class="bg-gray-100 border-b">
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Gambar
+                  </th>
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Part Number
+                  </th>
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Nama Barang
+                  </th>
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Kategori
+                  </th>
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Harga
+                  </th>
+                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
+                    Stok
+                  </th>
+                  <th class="py-3 px-4 text-center font-semibold text-gray-700">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse($products as $product)
+                <tr class="border-b hover:bg-gray-50 transition">
+                  <td class="py-3 px-4">
+                    <div
+                      class="w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 text-gray-500"
+                    >
+                      @if($product->category == 'Mesin')
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41l1.409-1.409m11.192 0 1.409 1.409M9.172 9.172 7.763 7.764m11.191 1.408 1.41-1.41M12 12v3.75m-3.75-3.75v.008H12"
+                        />
+                      </svg>
+                      @elseif($product->category == 'Oli & Pelumas')
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7 text-blue-600"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                        />
+                      </svg>
+                      @elseif($product->category == 'Pengereman')
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7 text-red-600"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                        />
+                      </svg>
+                      @elseif($product->category == 'Kelistrikan')
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7 text-yellow-500"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
+                        />
+                      </svg>
+                      @else
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-5.25v9"
+                        />
+                      </svg>
+                      @endif
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-sm">
+                    {{ $product->part_number }}
+                  </td>
+                  <td class="py-3 px-4 font-bold">{{ $product->name }}</td>
+                  <td class="py-3 px-4">
+                    <span
+                      class="px-2 py-1 bg-gray-200 rounded-full text-xs font-semibold"
+                      >{{ $product->category }}</span
+                    >
+                  </td>
+                  <td class="py-3 px-4 text-red-600 font-bold">
+                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <span
+                      class="{{ $product->stock <= 5 ? 'text-red-500 font-bold' : 'text-gray-700' }}"
+                    >
+                      {{ $product->stock }} pcs
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <div class="flex justify-center space-x-2">
+                      <a
+                        href="{{ route('product.edit', $product->id) }}"
+                        class="text-blue-600 hover:text-blue-900 font-semibold text-sm"
+                        >Edit</a
+                      >
+                      <form
+                        action="{{ route('product.destroy', $product->id) }}"
+                        method="POST"
+                        onsubmit="return confirm('Yakin ingin menghapus?')"
+                      >
+                        @csrf @method('DELETE')
+                        <button
+                          type="submit"
+                          class="text-red-600 hover:text-red-900 font-semibold text-sm"
+                        >
+                          Hapus
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                @empty
+                <tr>
+                  <td
+                    colspan="7"
+                    class="py-10 text-center text-gray-500 italic"
+                  >
+                    Belum ada data suku cadang.
+                  </td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Tabel Render Area -->
-    <div
-      class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100"
-    >
-      <table class="min-w-full divide-y divide-gray-100">
-        <thead class="bg-gray-50/50">
-          <tr>
-            <th>NAMA BARANG</th>
-            <th>KATEGORI</th>
-            <th>HARGA</th>
-            <th>STOK</th>
-            <th>AKSI</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-50">
-          @forelse ($products as $p)
-          <tr class="hover:bg-emerald-50/30">
-            <td>
-              {{ $p->name }} <br />
-              <small>{{ $p->description }}</small>
-            </td>
-            <td>
-              <span class="badge {{ $p->category }}">{{ $p->category }}</span>
-            </td>
-            <td>Rp {{ number_format($p->price, 0, ',', '.') }}</td>
-            <td>
-              <span
-                class="{{ $p->stock < 10 ? 'text-red-500' : 'text-emerald-600' }}"
-                >{{ $p->stock }}</span
-              >
-              @if($p->stock < 10)
-              <small class="text-red-500 animate-pulse">Limit</small> @endif
-            </td>
-            <td>
-              <a href="{{ route('product.edit', $p->id) }}">Edit</a>
-              <form
-                action="{{ route('product.destroy', $p->id) }}"
-                method="POST"
-              >
-                @csrf @method('DELETE')
-                <button type="submit">Hapus</button>
-              </form>
-            </td>
-          </tr>
-          @empty
-          <tr>
-            <td colspan="5" class="text-center">Inventaris Sembako Kosong.</td>
-          </tr>
-          @endforelse
-        </tbody>
-      </table>
     </div>
   </div>
 </x-app-layout>
@@ -698,24 +816,24 @@ Visualisasi terpadu perihal statistik gudang lengkap dengan badge list unik Tail
 
 ### 1. landing page
 
-<img width="1787" height="950" alt="Screenshot 2026-04-25 150524" src="https://github.com/user-attachments/assets/e3df95bb-8660-4b70-95ff-8f0abb327bb6" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda1.png" />
 
 ### 2. Register
 
-<img width="1290" height="952" alt="Screenshot 2026-04-25 150551" src="https://github.com/user-attachments/assets/c2e39fbb-9f27-4337-8d19-a540bc55fb87" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda2.png" />
 
 ### 3. Login
 
-<img width="1304" height="847" alt="Screenshot 2026-04-25 150540" src="https://github.com/user-attachments/assets/a3e77e5c-27b3-4452-b093-40b90ea39e46" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda3.png" />
 
 ### 4. Dashboard admin
 
-<img width="1426" height="962" alt="Screenshot 2026-04-25 150928" src="https://github.com/user-attachments/assets/d72102e5-bffe-4e89-82e2-f3fc829c587a" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda4.png" />
 
 ### 5. Tambah Data
 
-<img width="1534" height="973" alt="Screenshot 2026-04-25 150627" src="https://github.com/user-attachments/assets/9f8c1938-c906-43d0-8415-e085da4d85e3" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda5.png" />
 
 ### 6. Edit Data
 
-<img width="1300" height="970" alt="Screenshot 2026-04-25 150942" src="https://github.com/user-attachments/assets/653dc574-71e1-4dc2-b5b8-bf5fc05c4bbb" />
+<img width="1836" height="770" alt="Screenshot Halaman Produk" src="honda6.png" />
