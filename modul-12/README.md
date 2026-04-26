@@ -22,8 +22,8 @@
   <h3>Disusun Oleh :</h3>
 
   <p>
-    <strong>Arnanda setya nosa putra</strong><br>
-    <strong>2311102180</strong><br>
+    <strong>Arvan Murbiyanto</strong><br>
+    <strong>23111021074</strong><br>
     <strong>S1 IF-11-04</strong>
   </p>
 
