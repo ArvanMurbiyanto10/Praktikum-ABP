@@ -83,7 +83,7 @@ tampilan aplikasi.
 _(Penjelasan: Screenshot SDK Manager untuk memastikan build tools aman)_
 
 <p>
-<img width="1002" height="744" alt="Screenshot 2026-05-04 003252" src="https://github.com/user-attachments/assets/f86fc37c-aba4-465c-8169-64c252592edf" />
+<img src="foto1.png" width="1225" height="972" alt="image">
 <img width="992" height="742" alt="Screenshot 2026-05-04 003318" src="https://github.com/user-attachments/assets/cb816512-6e96-4da7-962a-d8c7e9e6f189" />
 <img width="992" height="742" alt="Screenshot 2026-05-04 003259" src="https://github.com/user-attachments/assets/2c2126f8-a03f-4b67-816a-e32a52ed0970" />
 
